@@ -1,70 +1,167 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <stdbool.h>
+#include <string.h>
 
-// Código da Ilha – Edição Free Fire
-// Nível: Mestre
-// Este programa simula o gerenciamento avançado de uma mochila com componentes coletados durante a fuga de uma ilha.
-// Ele introduz ordenação com critérios e busca binária para otimizar a gestão dos recursos.
+#define MAX_BAG_ITEMS 10
 
-int main() {
-    // Menu principal com opções:
-    // 1. Adicionar um item
-    // 2. Remover um item
-    // 3. Listar todos os itens
-    // 4. Ordenar os itens por critério (nome, tipo, prioridade)
-    // 5. Realizar busca binária por nome
-    // 0. Sair
+struct Bag
+{
+    char name[30];
+    char type[20];
+    int amount;
+};
 
-    // A estrutura switch trata cada opção chamando a função correspondente.
-    // A ordenação e busca binária exigem que os dados estejam bem organizados.
+int bagItemCounter = 0;
 
-    return 0;
+// === Prototype funcions ===
+void addItem(struct Bag *bag);
+void removeItem(struct Bag *bag);
+void listBagItems(struct Bag *bag);
+void showMenu(struct Bag *bag);
+
+void clearEntryBuffer();
+
+int main()
+{
+    struct Bag bag[MAX_BAG_ITEMS];
+
+    printf("==============================\n");
+    printf("  SURVIVOR BAG - ISLAND CODE  \n");
+    printf("==============================\n");
+    
+    do
+    {
+        printf("Items amount: %d/%d\n", bagItemCounter, MAX_BAG_ITEMS);
+        showMenu(bag);
+    } while (1);
 }
 
-// Struct Item:
-// Representa um componente com nome, tipo, quantidade e prioridade (1 a 5).
-// A prioridade indica a importância do item na montagem do plano de fuga.
+void clearEntryBuffer()
+{
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
+}
 
-// Enum CriterioOrdenacao:
-// Define os critérios possíveis para a ordenação dos itens (nome, tipo ou prioridade).
+void showMenu(struct Bag *bag)
+{
+    int menuOption;
 
-// Vetor mochila:
-// Armazena até 10 itens coletados.
-// Variáveis de controle: numItens (quantidade atual), comparacoes (análise de desempenho), ordenadaPorNome (para controle da busca binária).
+    printf("\n1. Add Item\n");
+    printf("2. Remove Item\n");
+    printf("3. Show Bag Items\n");
+    printf("0. Exit\n");
+    printf("------------------------------\n");
+    printf("Choose an option: ");
+    scanf("%d", &menuOption);
+    clearEntryBuffer();
 
-// limparTela():
-// Simula a limpeza da tela imprimindo várias linhas em branco.
+    switch (menuOption)
+    {
+        case 1:
+            addItem(bag);
+            break;
 
-// exibirMenu():
-// Apresenta o menu principal ao jogador, com destaque para status da ordenação.
+        case 2:
+            removeItem(bag);
+            break;
 
-// inserirItem():
-// Adiciona um novo componente à mochila se houver espaço.
-// Solicita nome, tipo, quantidade e prioridade.
-// Após inserir, marca a mochila como "não ordenada por nome".
+        case 3:
+            listBagItems(bag);
+            break;
 
-// removerItem():
-// Permite remover um componente da mochila pelo nome.
-// Se encontrado, reorganiza o vetor para preencher a lacuna.
+        case 0:
+            printf("\nExiting...\n");
+            exit(0);
+            break;
 
-// listarItens():
-// Exibe uma tabela formatada com todos os componentes presentes na mochila.
+        default:
+            printf("\nInvalid option!\n");
+            break;
+    }
+}
 
-// menuDeOrdenacao():
-// Permite ao jogador escolher como deseja ordenar os itens.
-// Utiliza a função insertionSort() com o critério selecionado.
-// Exibe a quantidade de comparações feitas (análise de desempenho).
+void listBagItems(struct Bag *bag)
+{
+    printf("\n------ BAG ITEMS (%d/%d) -------\n", bagItemCounter, MAX_BAG_ITEMS);
+    printf("--------------------------------------------\n");
+    printf("NAME            | TYPE          | AMOUNT    \n");
+    printf("--------------------------------------------\n");
+    for (int index = 0; index < bagItemCounter; index++)
+    {
+        printf("%s          | %s            | %d    \n", bag[index].name, bag[index].type, bag[index].amount);
+    }
+    printf("--------------------------------------------\n");
 
-// insertionSort():
-// Implementação do algoritmo de ordenação por inserção.
-// Funciona com diferentes critérios de ordenação:
-// - Por nome (ordem alfabética)
-// - Por tipo (ordem alfabética)
-// - Por prioridade (da mais alta para a mais baixa)
+    printf("\nPress any key to continue...");
+    getchar();
 
-// buscaBinariaPorNome():
-// Realiza busca binária por nome, desde que a mochila esteja ordenada por nome.
-// Se encontrar, exibe os dados do item buscado.
-// Caso contrário, informa que não encontrou o item.
+    return;
+}
+
+void addItem(struct Bag *bag)
+{
+    if (bagItemCounter >= MAX_BAG_ITEMS)
+    {
+        printf("\nThe bag is full! Remove something first.\n");
+        return;
+    }
+
+    struct Bag newItem;
+
+    printf("\nEnter item name: ");
+    fgets(newItem.name, sizeof(newItem.name), stdin);
+    newItem.name[strcspn(newItem.name, "\n")] = '\0'; // remove \n
+
+    printf("Enter item type: ");
+    fgets(newItem.type, sizeof(newItem.type), stdin);
+    newItem.type[strcspn(newItem.type, "\n")] = '\0';
+
+    printf("Enter item amount: ");
+    scanf("%d", &newItem.amount);
+    clearEntryBuffer();
+
+    bag[bagItemCounter] = newItem;
+    bagItemCounter++;
+
+    printf("\nItem added successfully!\n");
+}
+
+void removeItem(struct Bag *bag)
+{
+    if (bagItemCounter == 0)
+    {
+        printf("\nThe bag is empty!\n");
+        return;
+    }
+
+    char nameToRemove[30];
+    printf("\nEnter the item name to remove: ");
+    fgets(nameToRemove, sizeof(nameToRemove), stdin);
+    nameToRemove[strcspn(nameToRemove, "\n")] = '\0';
+
+    int found = -1;
+
+    for (int i = 0; i < bagItemCounter; i++)
+    {
+        if (strcmp(bag[i].name, nameToRemove) == 0)
+        {
+            found = i;
+            break;
+        }
+    }
+
+    if (found == -1)
+    {
+        printf("\nItem not found!\n");
+        return;
+    }
+
+    for (int i = found; i < bagItemCounter - 1; i++)
+    {
+        bag[i] = bag[i + 1];
+    }
+
+    bagItemCounter--;
+    printf("\nItem removed successfully!\n");
+}
